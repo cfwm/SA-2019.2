@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <!-- TITLE -->
+    <title>APP</title>
+    <!-- ENCODING -->
+    <meta charset="utf-8" />
+    <!-- DOCUMENT AREA -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- DESCRIPTION -->
+    <meta name=" description"
+        content="Aplicação para registrar e publicizar bens e danos ambientais.">
+    <!-- KEYWORDS -->
+    <meta name="keywords"
+        content="meio ambiente, aplicativo, ONGs, bem ambiental, dano ambiental, identificação, localização">
+    <!-- DEFAULT DOCUMENT -->
+    <meta name="robots" content="index, follow">
+    <!-- AUTHOR -->
+    <meta name="author" content="Augusto Gervini e Carlos Moreira">
+    <!-- THEME COLOR -->
+    <meta name="theme-color" content="#f1f68a" />
+    <!-- MATERIAL DESIGN LITE FONT -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- ROBOTO FONT -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <!-- MATERIAL DESIGN LITE CSS -->
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/material.min.css" />
+    <!-- APP CSS -->
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/app.css" />
+    <!-- HERE -->
+    <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.0/mapsjs-ui.css?dp-version=1549984893" />
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-core.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-clustering.js"></script>
+    <!-- ICON -->
+    <link rel="apple-touch-icon" sizes="72x72" href="fav/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="fav/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="fav/favicon-16x16.png">
+    <link rel="mask-icon" href="fav/safari-pinned-tab.svg" color="#424242">
+    <meta name="msapplication-TileColor" content="#424242">
+    <!-- MANIFEST -->
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        .occurrence_list {
+            margin: 5%;
+            width: 100%;
+            color: #f3f5cb;
+        }
+    </style>
+</head>
+
+<body style="background-color: #f1f68a">
+    <style>
+        body {
+          background-image: url('images/background1.jpg');
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+          background-size: cover;
+        }
+        </style>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header
+    mdl-layout--fixed-tabs">
+        <!-- TOOLBAR -->
+        <header class="mdl-layout__header" style="background-color: #4caf50; color: #f3f5cb;">
+            <div class="mdl-layout__header-row" style="color: #f3f5cb; background-color: #4caf50;">
+                <!-- TITLE -->
+                <span class="mdl-layout-title" style="color: #f3f5cb;">MICA</span>
+                <div class="mdl-layout-spacer"></div>
+                <!-- CLUSTER BUTTON => app_cluster -->
+                <button class="mdl-button mdl-js-button mdl-button--icon" style="margin-right: 10px;">
+                    <i class="material-icons" id="app_cluster" style="color: #f3f5cb;">group_work</i>
+                </button>
+                <!-- FILTER BUTTON => app_filter -->
+                <button class="mdl-button mdl-js-button mdl-button--icon" style="margin-right: 10px; color: #f3f5cb;">
+                    <i class="material-icons" id="app_filter">filter_list</i>
+                </button>
+                <!-- HELP BUTTON => app_help -->
+                <button class="mdl-button mdl-js-button mdl-button--icon"; style="color: #f3f5cb;">
+                    <i class="material-icons" id="app_help">help</i>
+                </button>
+            </div>
+            <!-- TABS -->
+            <div class="mdl-layout__tab-bar mdl-js-ripple-effect" style="background-color: #4caf50;">
+                <a id="tab_map" href="#fixed-tab-1" class="mdl-layout__tab is-active" style="color: #f3f5cb;">Mapa</a>
+                <a id="tab_list" href="#fixed-tab-2" class="mdl-layout__tab" style="color: #f3f5cb;">Lista</a>
+                <a id="tab_add" href="#fixed-tab-3" class="mdl-layout__tab" style="color: #f3f5cb;">Adicionar</a>
+            </div>
+        </header>
+        <!-- MENU -->
+        <div class="mdl-layout__drawer" style="background-color: #f3f5cb;">
+            <!-- TITLE -->
+            <span class="mdl-layout-title" style="color: #4caf50;">MENU</span>
+            <!-- ITEMS -->
+            <nav class="mdl-navigation" style="background-color: #f3f5cb;">
+                <p class="mdl-navigation__link" style="color: #4caf50;">Perfil</p>
+                <p class="mdl-navigation__link" style="color: #4caf50;">Créditos</p>
+                <p class="mdl-navigation__link" style="color: #4caf50;">Sair</p>
+            </nav>
+        </div>
+        <!-- MAIN CONTENT -->
+        <main class="mdl-layout__content">
+            <!-- MAP SECTION -->
+            <section class="mdl-layout__tab-panel is-active" id="fixed-tab-1">
+                <div class="page-content">
+                    <div id="map" style="position: fixed; width: 100%; height: calc(100% - 104px); background: #f3f5cb">
+                    </div>
+                </div>
+            </section>
+            <!-- LIST SECTION -->
+            <section class="mdl-layout__tab-panel" id="fixed-tab-2" style="display: none;">
+                <div class="page-content">
+                    <!-- LOGIN CARD -->
+                    <div id="list_content" class="app-card-wide mdl-card mdl-shadow--4dp"
+                        style="margin: 5%; width: 90%;">
+                        <div class="mdl-card__actions" style="width: 100%; display: flex; flex-direction: column; background-color: #f3f5cb;">
+                            <!-- OCCURRENCE LIST TEXT -->
+                            <div class="mdl-card__supporting-text"
+                                style="width: 70%; align-self: center; padding: 16px 0 0 0; text-align: justify; color: #4caf50;">
+                                Lista ordenada conforme a data em que as ocorrências foram adicionadas:
+                            </div>
+                            <ul class="occurrence_list mdl-list">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- ADD OCCURRENCE SECTION -->
+            <section class="mdl-layout__tab-panel" id="fixed-tab-3" style="display: none;">
+                <div class=" page-content">
+                    <div id="add_content" class="app-card-wide mdl-card mdl-shadow--4dp"
+                        style="margin: 5%; width: 90%;">
+                        <div class="mdl-card__actions" style="width: 100%; display: flex; flex-direction: column; background-color: #f3f5cb; color: #4caf50;">
+                           
+                            <!-- OCCURRENCE TYPE TEXT -->
+                            <div class="mdl-card__supporting-text"
+                                style="width: 70%; align-self: center; padding: 16px 0; text-align: justify; color: #4caf50;">
+                                Favor informar o tipo da ocorrência *:
+                            </div>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_type1"
+                                style="width: 70%; align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_type1" class="mdl-radio__button" name="occurrence_type"
+                                    value="Bem Ambiental" onclick="mudar2()" checked> 
+                                <span class="mdl-radio__label">Bem Ambiental</span>
+                            </label>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_type2"
+                                style="width: 70%; align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_type2" class="mdl-radio__button" name="occurrence_type"
+                                    value="Dano Ambiental" onclick="mudar1()">
+                                <span class="mdl-radio__label">Dano Ambiental</span>
+                            </label>                       
+                            
+                            <!--OCCURRENCE CLASSIFICATION-->
+                            <div class="mdl-card__supporting-text" 
+                                style="width: 70%; align-self: center; padding: 16px 0; color: #4caf50;">
+                                Favor informar a classificação da ocorrência *:
+                            </div>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification1"
+                                style="width: 70%;  height:10% ;align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_classification1" class="mdl-radio__button" name="occurrence_classification"
+                                    value="Unidade de Conservação Ambiental.">
+                                <span id="lb1" class="mdl-radio__label">Unidade de Conservação Ambiental.</span>
+                            </label>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification2"
+                                style="width: 70%; height:10% ;align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_classification2" class="mdl-radio__button" name="occurrence_classification"
+                                    value="Tratamento de Resíduos Sólidos.">
+                                <span id="lb2" class="mdl-radio__label">Tratamento de Resíduos Sólidos.</span>
+                            </label>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification3"
+                                style="width: 70%; height:10% ;align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_classification3" class="mdl-radio__button" name="occurrence_classification"
+                                    value="Agricultura Orgânica/Agroecológica.">
+                                <span id="lb3" class="mdl-radio__label">Agricultura Orgânica / Agroecológica.</span>
+                            </label>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification4"
+                                style="width: 70%; height:10% ;align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_classification4" class="mdl-radio__button" name="occurrence_classification"
+                                    value="Comércio de Produtos Orgânicos/Agroecológicos.">
+                                <span id="lb4" class="mdl-radio__label">Comércio de Produtos Orgânicos / Agroecológicos.</span>
+                            </label>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification5"
+                                style="width: 70%; height:10% ;align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_classification5" class="mdl-radio__button" name="occurrence_classification"
+                                    value="Reciclagem.">
+                                <span id="lb5" class="mdl-radio__label">Reciclagem.</span>
+                            </label>
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification6"
+                                style="width: 70%; height:10% ;align-self: center; margin-bottom: 16px;">
+                                <input type="radio" id="occurrence_classification6" class="mdl-radio__button" name="occurrence_classification"
+                                    value="Produção de Energia Limpa/Renovável.">
+                                <span id="lb6" class="mdl-radio__label">Produção de Energia Limpa / Renovável.</span>
+                            </label>
+                                                 
+                            <!-- OCCURRENCE DESCRIPTION -->
+
+                            <div class="mdl-card__supporting-text"
+                                style="width: 70%; align-self: center; padding: 16px 0 0 0; text-align: justify; color: #4caf50;">
+                                Especifique os detalhes da ocorrência e o local em que se encontra *:
+                            </div>
+                            <!-- OCCURRENCE DESCRIPTION TEXT AREA => occurrence_description -->
+                            <div class="mdl-textfield mdl-js-textfield" style="width: 70%; align-self: center;">
+                                <textarea class=" mdl-textfield__input" type="text" maxlength="150" id="occurrence_description"
+                                    style="resize: none; height: 80px;"></textarea>
+                                <label class="mdl-textfield__label" for="occurrence_description">Descrição</label>
+                            </div>
+                            <!-- OCCURRENCE PICTURE TEXT -->
+                            <div class="mdl-card__supporting-text"
+                                style="width: 70%; align-self: center; padding: 16px 0; color: #4caf50;">
+                                Favor tirar uma foto do local *:
+                            </div>
+                            <!-- OCCURRENCE PICTURE => occurrence_picture -->
+                            <label for="occurrence_picture" style="margin: 0; align-self: center; margin: 0 0 16px 0; background-color: #4caf50; color: #f3f5cb;"
+                                class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                                <input type="file" accept="image/*" capture="camera" id="occurrence_picture"
+                                    style="display: none;">
+                                <i class="material-icons">photo</i>
+                            </label>
+                            <canvas id="occurrence_frame"
+                                style="width: 180px; height: 130px; align-self: center; margin-bottom: 16px; border: 2px solid #757575"></canvas>
+                            <!-- OCCURRENCE ADDRESS TEXT -->
+                            <div class="mdl-card__supporting-text"
+                                style="width: 70%; align-self: center; padding: 16px 0 0 0; text-align: justify; color: #4caf50;">
+                                Endereço aproximado (O endereço é preenchido automaticamente):
+                            </div>
+                            <!-- OCCURRENCE ADDRESS TEXT AREA => occurrence_address -->
+                            <div id="div_address" class="mdl-textfield mdl-js-textfield"
+                                style="width: 70%; align-self: center;">
+                                <textarea class=" mdl-textfield__input" type="text" maxlength="150" id="occurrence_address"
+                                    style="resize: none; height: 80px;" disabled></textarea>
+                                <label class="mdl-textfield__label" for="occurrence_address" style="color: #4caf50;">Endereço</label>
+                            </div>
+                            <!-- REGISTER BUTTON => app_register -->
+                            <div class="mdl-card__supporting-text"
+                            style="width: 70%; align-self: center; padding: 16px 0; color: #ff0000;"> 
+                                ATENÇÃO! A responsabilidade pelo cadastro de qualquer ocorrência é do usuário que realizou seu cadastro.
+                            </div>
+                            <button id="app_register"
+                                class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+                                style="width: 45%; align-self: center; margin-bottom: 16px; background-color: #4caf50; color: #f3f5cb;">
+                                Cadastrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SNACKBAR -->
+    <div id="app_snackbar" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action"></button>
+    </div>
+
+    <!-- DIALOG -->
+    <div id="app_dialog" class="flex_box dialog_background">
+        <div class="flex_box box_shadow">
+            <h1 class="unselected">Title</h1>
+            <div class="flex_box">
+                <p class="unselected">Message</p>
+            </div>
+            <div class="flex_box"></div>
+        </div>
+    </div>
+
+    <!-- LOADING -->
+    <div id="app_loading" class="flex_box loading_background">
+        <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner"></div>
+    </div>
+
+    <!-- FLOAT BUTTON -->
+    <button id="app_float"
+        class="float_button dl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+        <i class="material-icons">keyboard_arrow_down</i>
+    </button>
+
+    <!-- FILTER -->
+    <div id="app_divFilter" class="flex_box dialog_background">
+        <div class="flex_box box_shadow" style="background-color: #f3f5cb; color: #4caf50;">
+            <h1 class="unselected">Filtro</h1>
+            <div style="height: 230px; display: flex; flex-direction: column;">
+                <p style="margin-bottom: 16px">Tipo de ocorrência:</p>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_divType1"
+                    style="width: 70%; align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_divType1" class="mdl-radio__button" name="occurrence_typeF" value="Bem"
+                     checked>
+                    <span class="mdl-radio__label">Bem Ambiental</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_divType2"
+                    style="width: 70%; align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_divType2" class="mdl-radio__button" name="occurrence_typeF" value="Dano">
+                    <span class="mdl-radio__label">Dano Ambiental</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_divType2"
+                    style="width: 70%; align-self: center; margin-bottom: 16px; display: none;">
+                    <input type="radio" id="occurrence_divType2" class="mdl-radio__button" name="occurrence_typeF" value="Dano">
+                     <span class="mdl-radio__label">HIDE</span>
+                </label>
+                <!--<p style="margin-bottom: 16px">Classificação:</p>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification1"
+                    style="width: 80%;  height:15% ;align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_classification1F" class="mdl-radio__button" name="occurrence_classification"
+                    value="Unidade de Conservação Ambiental.">
+                    <span id="lb1" class="mdl-radio__label">Unidade de Conservação Ambiental.</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification2"
+                    style="width: 80%; height:15% ;align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_classification2F" class="mdl-radio__button" name="occurrence_classification"
+                    value="Tratamento de Resíduos Sólidos.">
+                    <span id="lb2" class="mdl-radio__label">Tratamento de Resíduos Sólidos.</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification3"
+                    style="width: 80%; height:15% ;align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_classification3F" class="mdl-radio__button" name="occurrence_classification"
+                    value="Agricultura Orgânica/Agroecológica.">
+                    <span id="lb3" class="mdl-radio__label">Agricultura Orgânica / Agroecológica.</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification4"
+                    style="width: 80%; height:15% ;align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_classification4F" class="mdl-radio__button" name="occurrence_classification"
+                    value="Comércio de Produtos Orgânicos/Agroecológicos.">
+                    <span id="lb4" class="mdl-radio__label">Comércio de Produtos Orgânicos / Agroecológicos.</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification5"
+                    style="width: 80%; height:15% ;align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_classification5F" class="mdl-radio__button" name="occurrence_classification"
+                    value="Reciclagem.">
+                    <span id="lb5" class="mdl-radio__label">Reciclagem.</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="occurrence_classification6"
+                    style="width: 80%; height:15% ;align-self: center; margin-bottom: 16px;">
+                    <input type="radio" id="occurrence_classification6F" class="mdl-radio__button" name="occurrence_classification"
+                    value="Produção de Energia Limpa/Renovável.">
+                    <span id="lb6" class="mdl-radio__label">Produção de Energia Limpa / Renovável.</span>
+                </label>-->
+
+                <p style="margin-bottom: 16px">Distância (m):</p>
+                <span style="width: 70%; align-self: center; display: flex; justify-content: center;">
+                    <button style="margin: 0 20px; font-size: 1.5em; background-color: #f3f5cb; color: #4caf50;">+</button>
+                    <p>100</p>
+                    <button style="margin: 0 20px; font-size: 1.5em; background-color: #f3f5cb; color: #4caf50;">-</button>
+                </span>
+
+            </div>
+            <div class="flex_box">
+                <button style="background-color: #f3f5cb; color: #4caf50;">CANCELAR</button>
+                <button style="background-color: #f3f5cb; color: #4caf50;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MATERIAL DESIGN LITE SCRIPT -->
+    <script src="scripts/material.min.js"></script>
+    <!-- APP SCRIPT -->
+    <script src="scripts/app.js"></script>
+    <!-- HERE SCRIPT -->
+    <script src="scripts/here.js"></script>
+    <!-- MAP SCRIPT -->
+    <script src="scripts/map.js"></script>
+</body>
+
+</html>
